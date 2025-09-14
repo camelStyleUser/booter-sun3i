@@ -26,20 +26,20 @@ char smBit3;
 struct drampara params={.bus_width=0xfefdfcfb};
 void main(void){//this is main
 	//it is called after uart is up
-	puts("BOOTER IS UP");
-	puts_nonl("RUNNING ON SUN3I");
+	puts("BOOTER UP");
+	puts_nonl("PLATFORM:SUN3I");
 	if((*(uint*)(0xffff0604))==0x161900){
 	puts(" F1E200");
 	}else{
-	puts(" UNKNOWN SOC");
+	puts(" ???");
 	}
 	int size;
 	if((size=init_dram())!=-1){
-		puts_nonl("DRAM IS UP.\nSIZE IS ");
+		puts_nonl("DRAM UP\nSIZE:");
 		print_dec(size);
-		puts(" MiB.");
+		puts(" MiB");
 	}else{
-		puts("FAILED TO INIT DRAM");
+		puts("DRAM FAIL");
 	}
 	//TODO:AAAA make it read a payload from the sd card
 	if(size!=-1) stage2();
@@ -112,7 +112,7 @@ int init_dram(void){
 		else tmp1=3;
 		*(volatile uint*)(DRAMC_BASE+0x0c)=((*(volatile uint*)(DRAMC_BASE+0x0c))&0xfffffe3f)|tmp1<<6;
 	}else{
-	puts("ASSERT FAIL: NOT DDR");
+	puts("NOT DDR");
 	return -1;
 	}
 	for(int i=0;i<128;i++){

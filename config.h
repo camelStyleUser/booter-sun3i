@@ -5,4 +5,5 @@
 #ifndef ASSEMBLY
 typedef unsigned int uint;//i just like it this way
 #endif
-#define CONFIG_PRIO_MMC2
+#define CONFIG_PRIO_MMC0
+#define CONFIG_NO_BACKUP_MMC

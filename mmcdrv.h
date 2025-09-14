@@ -37,14 +37,16 @@ struct sunxi_mmc {
 	u32 res0;		/* 0x54 reserved */
 	u32 a12a;		/* 0x58 Auto command 12 argument */
 	u32 ntsr;		/* 0x5c	New timing set register */
-	u32 res1[8];
+	u32 res1;		/* 0x60 reserved */
+	u32 smreg;		/* 0x64 some register */
+	u32 res2[6];
 	u32 dmac;		/* 0x80 internal DMA control */
 	u32 dlba;		/* 0x84 internal DMA descr list base address */
 	u32 idst;		/* 0x88 internal DMA status */
 	u32 idie;		/* 0x8c internal DMA interrupt enable */
 	u32 chda;		/* 0x90 */
 	u32 cbda;		/* 0x94 */
-	u32 res2[26];
+	u32 res3[26];
 	u32 fifo;		/* 0x100 / 0x200 FIFO access address */
 };
 
@@ -59,6 +61,7 @@ struct sunxi_mmc {
 					 SUNXI_MMC_GCTRL_FIFO_RESET|\
 					 SUNXI_MMC_GCTRL_DMA_RESET)
 #define SUNXI_MMC_GCTRL_DMA_ENABLE	(0x1 << 5)
+#define SUNXI_MMC_GCTRL_FIFO_USE	(0x1 << 6) // some fifo bit idk
 #define SUNXI_MMC_GCTRL_ACCESS_BY_AHB   (0x1 << 31)
 
 #define SUNXI_MMC_CMD_RESP_EXPIRE	(0x1 << 6)
@@ -162,3 +165,4 @@ int send_cmd(struct mmc_cmd*);
 #define MMC_RSP_R7	(MMC_RSP_PRESENT|MMC_RSP_CRC|MMC_RSP_OPCODE)
 
 #endif /* _MMCDRV_H */
+
