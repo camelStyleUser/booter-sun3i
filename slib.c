@@ -1,13 +1,13 @@
 #include "head.h"
+#include "config.h"
 char shared_hex_dec[17]="0123456789abcdef";
-void puts(char* string){
-	char* val=string;
-	while(*val) uart_putc((int)*(val++));
-	uart_putc((int)'\n');
-}
 void puts_nonl(char* string){
-	char* val=string;
+        char* val=string;
         while(*val) uart_putc((int)*(val++));
+}
+void puts(char* string){
+	puts_nonl(string);
+	uart_putc((int)'\n');
 }
 void print_hex(unsigned int value){
 	int shift;
@@ -20,10 +20,12 @@ void print_dec(int value){
 	if(value<0){
 		puts_nonl("-");
 		value=-value;
+		#ifndef CONFIG_EDGE_OPTIM
 		if(value<0){
 			puts_nonl("2147483648");
 			return;
 		}
+		#endif
 	}
 	int ripple=0;
 	int divisor=1000000000;

@@ -31,9 +31,6 @@ int init_mmc_dev(int num){
   cmd.arg = ((sd_version == 2) ? (1 << 30) : 0)|(1<<20);
   cmd.rsptyp = MMC_RSP_R3;
   send_cmd(&cmd);
-  puts_nonl("A41:");
-  print_hex(cmd.resp[0]);
-  puts("");
   if (cmd.resp[0] & (1U << 31)) goto init_succ;
   delay(0x200000);
  }
@@ -58,8 +55,6 @@ int init_mmc_dev(int num){
  cmd.arg=rca<<16;
  cmd.rsptyp=MMC_RSP_R6;
  if(send_cmd(&cmd)) return -1;
- print_hex(cmd.resp[0]);
- puts("");
  rca=cmd.resp[0]>>16;
  cmd.cmdidx=9;
  cmd.rsptyp=MMC_RSP_R2;
@@ -74,13 +69,6 @@ int init_mmc_dev(int num){
  cmd.arg=512;
  cmd.rsptyp=MMC_RSP_R1;
  if(send_cmd(&cmd)) return -1;
- puts_nonl("RCA:");
- print_hex(rca);
- puts("");
- for(i=0;i<4;i++) print_hex(cid[i]);
- puts("");
- for(i=0;i<4;i++) print_hex(csd[i]);
- puts("");
  //uhh i sure hope it worked
  return 0;
 }

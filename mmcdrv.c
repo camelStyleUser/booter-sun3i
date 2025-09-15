@@ -45,13 +45,6 @@ int mmc_set_mod_clk(unsigned int hz)
 	} else if (hz <= 25000000) {
 		oclk_dly = 0;
 		sclk_dly = 5;
-	} else if (hz <= 52000000) {
-		oclk_dly = 3;
-		sclk_dly = 4;
-	} else {
-		/* hz > 52000000 */
-		oclk_dly = 1;
-		sclk_dly = 4;
 	}
 	val = (oclk_dly<<8) | (sclk_dly<<20);
 
@@ -149,7 +142,7 @@ if(timeout==0||(status&SUNXI_MMC_RINT_INTERRUPT_ERROR_BIT)) return -1;
 return 0;
 }
 int mmc_trans_data_by_cpu(uint *data,int isw,int bytecnt){
- int timeout=0x20000000;
+ int timeout=0x02000000;
  uint status_bit=isw?SUNXI_MMC_STATUS_FIFO_FULL:SUNXI_MMC_STATUS_FIFO_EMPTY;
  //mmc_offset->gctrl|=SUNXI_MMC_GCTRL_ACCESS_BY_AHB;
  mmc_offset->smreg=0x3;
@@ -216,7 +209,6 @@ int send_cmd(struct mmc_cmd *cmd){
  out:
  if(error<0){
   mmc_offset->gctrl=SUNXI_MMC_GCTRL_RESET;
-  print_hex(mmc_offset->rint);
  }
  mmc_offset->rint=0xffffffff;
  mmc_offset->gctrl|=SUNXI_MMC_GCTRL_FIFO_RESET;

@@ -4,10 +4,17 @@
 #ifndef CONFIG_NO2NDSTAGE
 extern char memlog[1024];
 int bootmmc(int num){
-if(init_mmc_dev(num)){puts_nonl("MMC");print_dec(num);puts(":FAIL");return 0;}
-read_block(0,(unsigned int*)(memlog+512));
-shutdown_mmc_dev(num);
-return 1;
+ if(init_mmc_dev(num)){
+  #ifndef CONFIG_CONCISE_LOGS
+  puts_nonl("MMC");
+  print_dec(num);
+  puts(":FAIL");
+  #endif
+  return 0;
+ }
+ read_block(0,(unsigned int*)(memlog+512));
+ shutdown_mmc_dev(num);
+ return 1;
 }
 void stage2(void){
 #ifdef CONFIG_PRIO_MMC2

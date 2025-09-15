@@ -26,21 +26,36 @@ char smBit3;
 struct drampara params={.bus_width=0xfefdfcfb};
 void main(void){//this is main
 	//it is called after uart is up
+	#ifdef CONFIG_CONCISE_LOGS
+	puts_nonl("UP\nDRAM:");
+	#endif
+	#ifndef CONFIG_CONCISE_LOGS
 	puts("BOOTER UP");
-	puts_nonl("PLATFORM:SUN3I");
+	puts_nonl("PLATFORM:SUN3I ");
 	if((*(uint*)(0xffff0604))==0x161900){
-	puts(" F1E200");
+	puts("F1E200");
 	}else{
-	puts(" ???");
+	puts("???");
 	}
+	#endif
 	int size;
 	if((size=init_dram())!=-1){
+		#ifndef CONFIG_CONCISE_LOGS
 		puts_nonl("DRAM UP\nSIZE:");
+		#endif
 		print_dec(size);
-		puts(" MiB");
-	}else{
+		#ifdef CONFIG_CONCISE_LOGS
+		uart_putc((int)'\n');
+		#endif
+		#ifndef CONFIG_CONCISE_LOGS
+		puts("MiB");
+		#endif
+	}
+	#if !(defined(CONFIG_EDGE_OPTIM)&&defined(CONFIG_CONCISE_LOGS))
+	else{
 		puts("DRAM FAIL");
 	}
+	#endif
 	//TODO:AAAA make it read a payload from the sd card
 	if(size!=-1) stage2();
 }
@@ -111,10 +126,13 @@ int init_dram(void){
 		else if(DRAM_FREQ<151) tmp1=2;
 		else tmp1=3;
 		*(volatile uint*)(DRAMC_BASE+0x0c)=((*(volatile uint*)(DRAMC_BASE+0x0c))&0xfffffe3f)|tmp1<<6;
-	}else{
+	}
+	#ifndef CONFIG_EDGE_OPTIM
+	else{
 	puts("NOT DDR");
 	return -1;
 	}
+	#endif
 	for(int i=0;i<128;i++){
 		*(volatile int*)(DRAM_START+0x200+i)=0x11111111;
 		*(volatile int*)(DRAM_START+0x600+i)=0x22222222;
