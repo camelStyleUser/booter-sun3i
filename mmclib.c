@@ -1,4 +1,18 @@
 /*taken from u-boot sunxi_mmc too(but actually adapted)*/
+/*
+ * (C) Copyright 2007-2011
+ * Allwinner Technology Co., Ltd. <www.allwinnertech.com>
+ * Aaron <leafy.myeh@allwinnertech.com>
+ *
+ * MMC driver for allwinner sunxi platform.
+ *
+ * This driver is used by the (ARM) SPL with the legacy MMC interface, and
+ * by U-Boot proper using the full DM interface. The actual hardware access
+ * code is common, and comes first in this file.
+ * The legacy MMC interface implementation comes next, followed by the
+ * proper DM_MMC implementation at the end.
+ */
+/*minor modifications by 6f6626/camelStyleUser*/
 #include "mmcdrv.h"
 #include "slib.h"
 #include "head.h"
@@ -93,5 +107,10 @@ int write_block(int blockpos,unsigned int *data){
  return send_cmd(&cmd);
 }
 int shutdown_mmc_dev(int num){
-return shutdown_mmc(num);
+ struct mmc_cmd cmd;
+ cmd.cmdidx=15;
+ cmd.rsptyp=MMC_RSP_NONE;
+ cmd.arg=rca<<16;
+ if(send_cmd(&cmd)) return -1;
+ return shutdown_mmc(num);
 }

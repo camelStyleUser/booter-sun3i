@@ -1,4 +1,18 @@
 //taken from u-boot sunxi_mmc driver
+/*
+ * (C) Copyright 2007-2011
+ * Allwinner Technology Co., Ltd. <www.allwinnertech.com>
+ * Aaron <leafy.myeh@allwinnertech.com>
+ *
+ * MMC driver for allwinner sunxi platform.
+ *
+ * This driver is used by the (ARM) SPL with the legacy MMC interface, and
+ * by U-Boot proper using the full DM interface. The actual hardware access
+ * code is common, and comes first in this file.
+ * The legacy MMC interface implementation comes next, followed by the
+ * proper DM_MMC implementation at the end.
+ */
+//slightly modified by 6f6626/camelStyleUser
 #include "config.h"
 #include "mmcdrv.h"
 #include "pio.h"
@@ -12,6 +26,9 @@
 struct sunxi_mmc *mmc_offset;
 int mmc_num;
 volatile unsigned int* clkr;
+uint pint1;
+uint pint2;
+uint pint3;
 int send_raw_cmd_value(int,struct sunxi_mmc*);
 int mmc_set_mod_clk(unsigned int hz)
 {
@@ -58,6 +75,9 @@ int init_mmc(int num){
  if(num==2){
   *(volatile uint*)(CCM_BASE+CCM_REG_AHB_GAT_O)=*(volatile uint*)(CCM_BASE+CCM_REG_AHB_GAT_O)|0x200;
   *(volatile uint*)(CCM_BASE+CCM_REG_SD23_CLK_R_O)=((*(volatile uint*)(CCM_BASE+CCM_REG_SD23_CLK_R_O))&0xffffffc0)|0xb0;
+  pint1=SUNXI_PIO_CTRL->banks[2].cfg[0];
+  pint2=SUNXI_PIO_CTRL->banks[2].cfg[1];
+  pint3=SUNXI_PIO_CTRL->banks[2].pull[0];
   SUNXI_PIO_CTRL->banks[2].cfg[0]&=~0xff00000;
   SUNXI_PIO_CTRL->banks[2].cfg[0]|=0x3300000;
   SUNXI_PIO_CTRL->banks[2].cfg[1]&=~0xf0000;
@@ -68,6 +88,8 @@ int init_mmc(int num){
  }else{
   *(volatile uint*)(CCM_BASE+CCM_REG_AHB_GAT_O)=*(volatile uint*)(CCM_BASE+CCM_REG_AHB_GAT_O)|0x80;
   *(volatile uint*)(CCM_BASE+CCM_REG_SD01_CLK_R_O)=((*(volatile uint*)(CCM_BASE+CCM_REG_SD01_CLK_R_O))&0xffffffc0)|0xb0;
+  pint1=SUNXI_PIO_CTRL->banks[0].cfg[0];
+  pint2=SUNXI_PIO_CTRL->banks[0].pull[0];
   SUNXI_PIO_CTRL->banks[0].cfg[0]&=~0xfff0;
   SUNXI_PIO_CTRL->banks[0].cfg[0]|=0x2220;
   SUNXI_PIO_CTRL->banks[0].pull[0]&=~0xfc;
@@ -121,14 +143,14 @@ int shutdown_mmc(int num){
  if(num==2){
   *(volatile uint*)(CCM_BASE+CCM_REG_AHB_GAT_O)=*(volatile uint*)(CCM_BASE+CCM_REG_AHB_GAT_O)&(~0x200);
   *(volatile uint*)(CCM_BASE+CCM_REG_SD23_CLK_R_O)=*(volatile uint*)(CCM_BASE+CCM_REG_SD23_CLK_R_O)&(~0xb0);
-  SUNXI_PIO_CTRL->banks[2].cfg[0]&=~0x3300000;
-  SUNXI_PIO_CTRL->banks[2].cfg[1]&=~0x30000;
-  SUNXI_PIO_CTRL->banks[2].pull[0]&=~0x1500;
+  SUNXI_PIO_CTRL->banks[2].cfg[0]=pint1;
+  SUNXI_PIO_CTRL->banks[2].cfg[1]=pint2;
+  SUNXI_PIO_CTRL->banks[2].pull[0]=pint3;
  }else{
   *(volatile uint*)(CCM_BASE+CCM_REG_AHB_GAT_O)=*(volatile uint*)(CCM_BASE+CCM_REG_AHB_GAT_O)&(~0x80);
   *(volatile uint*)(CCM_BASE+CCM_REG_SD23_CLK_R_O)=*(volatile uint*)(CCM_BASE+CCM_REG_SD23_CLK_R_O)&(~0xb0);
-  SUNXI_PIO_CTRL->banks[0].cfg[0]&=~0x2220;
-  SUNXI_PIO_CTRL->banks[0].pull[0]&=~0x54;
+  SUNXI_PIO_CTRL->banks[0].cfg[0]=pint1;
+  SUNXI_PIO_CTRL->banks[0].pull[0]=pint2;
  }
 return 0;
 }
