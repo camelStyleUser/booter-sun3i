@@ -13,7 +13,7 @@ int bootmmc(int num){
   return 0;
  }
  read_block(0,(unsigned int*)(memlog+512));
- shutdown_mmc_dev(num);
+ shutdown_mmc(num);
  return 1;
 }
 void stage2(void){

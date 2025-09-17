@@ -37,9 +37,12 @@ int mmc_set_mod_clk(unsigned int hz)
 	if (hz <= 24000000) {
 		pll = (0<<24);
 		pll_hz = 24000000;
-	} else {
+	}
+	#ifndef CONFIG_EDGE_OPTIM
+	else {
 		return -1;
 	}
+	#endif
 
 	div = pll_hz / hz;
 	if (pll_hz % hz)
@@ -50,16 +53,17 @@ int mmc_set_mod_clk(unsigned int hz)
 		n++;
 		div = (div + 1) / 2;
 	}
-
+	#ifndef CONFIG_EDGE_OPTIM
 	if (n > 3) {
 		return -1;
 	}
+	#endif
 
 	/* determine delays */
 	if (hz <= 400000) {
 		oclk_dly = 0;
 		sclk_dly = 0;
-	} else if (hz <= 25000000) {
+	} else{
 		oclk_dly = 0;
 		sclk_dly = 5;
 	}
