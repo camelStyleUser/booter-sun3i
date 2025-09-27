@@ -23,7 +23,8 @@ char cols;
 char rows;
 char smBit3;
 };
-struct drampara params={.bus_width=0xfefdfcfb};
+int dram_size;
+struct drampara params={};
 void main(void){//this is main
 	//it is called after uart is up
 	#ifdef CONFIG_CONCISE_LOGS
@@ -38,12 +39,11 @@ void main(void){//this is main
 	puts("???");
 	}
 	#endif
-	int size;
-	if((size=init_dram())!=-1){
+	if((dram_size=init_dram())!=-1){
 		#ifndef CONFIG_CONCISE_LOGS
 		puts_nonl("DRAM UP\nSIZE:");
 		#endif
-		print_dec(size);
+		print_dec(dram_size);
 		#ifdef CONFIG_CONCISE_LOGS
 		uart_putc((int)'\n');
 		#endif
@@ -57,7 +57,7 @@ void main(void){//this is main
 	}
 	#endif
 	//TODO:AAAA make it read a payload from the sd card
-	if(size!=-1) stage2();
+	if(dram_size!=-1) stage2();
 }
 //TODO:document this stuff
 void set_dram_clock(uint freq){

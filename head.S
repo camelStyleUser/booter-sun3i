@@ -22,7 +22,7 @@
 #ifdef CONFIG_MEM_LOG
 .global memlogcurchar
 .global memlog
-#define MEMLOG_END memlog+1024
+#define MEMLOG_END memlog+2048
 #endif
 _real_start://SAVE OUR CODE
 	b _start
