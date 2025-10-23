@@ -37,3 +37,16 @@ void print_dec(int value){
 		uart_putc(shared_hex_dec[digit]);
 	}
 }
+void hexdump(unsigned char* data,unsigned int len){
+ for(unsigned int off=0;off<len;){
+  uart_putc(shared_hex_dec[data[off]>>4]);
+  uart_putc(shared_hex_dec[data[off]&0xF]);
+  uart_putc(' ');
+  off++;
+  if(off%8==0){
+   uart_putc((int)'\n');
+   print_hex(off);
+   puts_nonl(": ");
+  }
+ }
+}
