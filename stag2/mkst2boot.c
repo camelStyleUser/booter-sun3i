@@ -8,7 +8,7 @@
 #include <sys/mman.h>
 #pragma pack(push,1)
 struct stage2_desc_sector{
-uint64_t magic;//0x000-0x007: 0xDEADFEEDD00DEA7
+uint64_t magic;//0x000-0x007: 0xDEADFEEDD00DEA70
 unsigned int blockpos;//0x008-0x00b:block position of start of stage2 image
 unsigned int blocksize;//0x00c-0x00f:size of stage2 image in blocks
 unsigned int codeadler32;//0x010-0x013:adler32 of second stage image
