@@ -13,9 +13,9 @@ int main(int dram_size){
 struct fat32_file root;
 struct fat32_file child;
 struct fat32_file_handle handle;
-puts_nonl("AHH,free at last(dram:");
+puts_nonl("received dram size from stage 1:");
 print_dec(dram_size);
-puts(")");
+puts("MiB");
 #ifdef CONFIG_PRIO_MMC0
 init_mmc_dev(0);
 #else
