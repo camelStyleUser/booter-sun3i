@@ -3,7 +3,7 @@
 char shared_hex_dec[17]="0123456789abcdef";
 void puts_nonl(char* string){
         char* val=string;
-        while(*val) uart_putc((int)*(val++));
+        while(*val) uart_putc(*(val++));
 }
 void puts(char* string){
 	puts_nonl(string);
