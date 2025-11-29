@@ -52,7 +52,7 @@ size=0;
 buffer[64]=0;
 puts_nonl((char*)buffer);
 }
-puts_nonl("\nRead ");
+puts_nonl("\r\nRead ");
 print_dec(child.size);
 puts(" bytes.");
 err:

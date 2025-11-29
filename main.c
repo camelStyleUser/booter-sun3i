@@ -28,7 +28,7 @@ struct drampara params={};
 void main(void){//this is main
 	//it is called after uart is up
 	#ifdef CONFIG_CONCISE_LOGS
-	puts_nonl("UP\nDRAM:");
+	puts_nonl("UP\r\nDRAM:");
 	#endif
 	#ifndef CONFIG_CONCISE_LOGS
 	puts("BOOTER UP");
@@ -41,11 +41,11 @@ void main(void){//this is main
 	#endif
 	if((dram_size=init_dram())!=-1){
 		#ifndef CONFIG_CONCISE_LOGS
-		puts_nonl("DRAM UP\nSIZE:");
+		puts_nonl("DRAM UP\r\nSIZE:");
 		#endif
 		print_dec(dram_size);
 		#ifdef CONFIG_CONCISE_LOGS
-		uart_putc((int)'\n');
+		puts("");
 		#endif
 		#ifndef CONFIG_CONCISE_LOGS
 		puts("MiB");

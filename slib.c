@@ -7,7 +7,8 @@ void puts_nonl(char* string){
 }
 void puts(char* string){
 	puts_nonl(string);
-	uart_putc((int)'\n');
+	uart_putc(0x0d);//send CR
+	uart_putc('\n');
 }
 void print_hex(unsigned int value){
 	int shift;
