@@ -163,7 +163,7 @@ unsigned int fat32_read(struct fat32_file_handle* handle,unsigned char* data,uns
   read_block(sector,(unsigned int*)buf);
   sector_last=(handle->cur_loc%512)+read_size;
   sector_last=sector_last>512?512:sector_last;
-  for(int i=handle->cur_loc%512;i<sector_last;i++){
+  for(unsigned int i=handle->cur_loc%512;i<sector_last;i++){
    data[out_index++]=buf[i];
   }
   obtained=sector_last-(handle->cur_loc%512);
@@ -184,7 +184,7 @@ int fat32_seek(struct fat32_file_handle* handle,unsigned int seek_distance,unsig
  unsigned int tmp;
  switch(seek_flags){
  case FAT32_SEEK_FORWARD:
- for(int i=0;i<(seek_distance/(512*partition_data.sec_per_clust));i++){
+ for(unsigned int i=0;i<(seek_distance/(512*partition_data.sec_per_clust));i++){
   read_block(partition_data.start+partition_data.resv_sect+(handle->cur_clust_num/128),(unsigned int*)buf); //MMC block size is 512 bytes
   if((((unsigned int*)buf)[handle->cur_clust_num%128]&0x0FFFFFFF)>=0x0FFFFFF7){
    return 1;
@@ -207,7 +207,7 @@ int fat32_seek(struct fat32_file_handle* handle,unsigned int seek_distance,unsig
  /* FALLTHRU */
  case FAT32_SEEK_SET:
  handle->cur_clust_num=handle->file.clust_num;
- for(int i=0;i<(seek_distance/(512*partition_data.sec_per_clust));i++){
+ for(unsigned int i=0;i<(seek_distance/(512*partition_data.sec_per_clust));i++){
   read_block(partition_data.start+partition_data.resv_sect+(handle->cur_clust_num/128),(unsigned int*)buf); //MMC block size is 512 bytes
   if((((unsigned int*)buf)[handle->cur_clust_num%128]&0x0FFFFFFF)>=0x0FFFFFF7){
    return 1;

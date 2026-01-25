@@ -3,7 +3,10 @@ CROSS_CC = ${CROSSCOMPILE}gcc
 ARM_ELF_FLAGS = -flto -Os -marm -fpic -Wall
 ARM_ELF_FLAGS += -fno-common -fno-builtin -ffreestanding -nostdinc -fno-strict-aliasing
 ARM_ELF_FLAGS += -mno-thumb-interwork -fno-stack-protector -fno-toplevel-reorder
-ARM_ELF_FLAGS += -Wstrict-prototypes -Wno-format-nonliteral -Wno-format-security
+ARM_ELF_FLAGS += -Wstrict-prototypes -Wno-format-nonliteral -Wno-format-security -Wall -Wpedantic -Wextra
+ifeq ($(BUILDTYPE),RELEASE)
+ARM_ELF_FLAGS += -Werror
+endif
 BOOTER_OBJECTS = enter.o limpl.o main.o slib.o mmcdrv.o mmclib.o part.o mbr.o fat32.o
 MKST2BOOT = ./mkst2boot
 PADBT2 = ./padbt2.sh
@@ -26,5 +29,5 @@ mkst2boot: mkst2boot.c
 %.desc: %.bin mkst2boot
 	$(MKST2BOOT) $< $(BLKOFFSET) $@
 clean:
-	$(RM) -f *.elf *.bin mkst2boot *.sunxi *.o *.desc
+	$(RM) -f *.elf *.bin mkst2boot *.o *.desc
 .PHONY: all clean

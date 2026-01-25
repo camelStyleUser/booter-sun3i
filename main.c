@@ -24,7 +24,7 @@ char rows;
 char smBit3;
 };
 int dram_size;
-struct drampara params={};
+struct drampara params;
 void main(void){//this is main
 	//it is called after uart is up
 	#ifdef CONFIG_CONCISE_LOGS

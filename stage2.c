@@ -44,6 +44,7 @@ int bootmmc(int num){
   print_hex(expect);
   puts_nonl(",GOT:");
   print_hex(actual);
+  puts("");
   #endif
   return 0;
  }
@@ -66,11 +67,12 @@ int bootmmc(int num){
   print_hex(expect);
   puts_nonl(",GOT:");
   print_hex(actual);
+  puts("");
   #endif
  }
  shutdown_mmc(num);
  int (*entry)(int);//pass dram size in megabytes
- entry=(void*)(0x80000000);
+ entry=(int (*)(int))0x80000000;
  #ifndef CONFIG_CONCISE_LOGS
  puts("RUNSTAGE2");
  #endif

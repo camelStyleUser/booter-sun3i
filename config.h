@@ -2,7 +2,7 @@
 //#define CONFIG_MEM_LOG
 //MAKE SURE TO DEFINE CONFIG_NO2NDSTAGE IF YOU DO NOT WANT IT TO LOAD A SECONDARY BOOTLOADER AND INSTEAD BRANCH TO FEL
 //#define CONFIG_NO2NDSTAGE
-#ifndef ASSEMBLY
+#ifndef __ASSEMBLER__
 typedef unsigned int uint;//i just like it this way
 #endif
 #define CONFIG_PRIO_MMC0

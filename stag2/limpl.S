@@ -1,4 +1,3 @@
-#define ASSEMBLY
 #include "config.h"
 #define UART0_BASE	0x01c21000
 .global uart_putc,uart_isavail,uart_getc,delay,disable_icache

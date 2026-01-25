@@ -30,7 +30,7 @@ uint pint1;
 uint pint2;
 uint pint3;
 int send_raw_cmd_value(int,struct sunxi_mmc*);
-int mmc_set_mod_clk(unsigned int hz)
+/*int mmc_set_mod_clk(unsigned int hz)
 {
 	unsigned int pll, pll_hz, div, n, oclk_dly, sclk_dly;
 	u32 val = 0;
@@ -59,7 +59,7 @@ int mmc_set_mod_clk(unsigned int hz)
 	}
 	#endif
 
-	/* determine delays */
+	// determine delays
 	if (hz <= 400000) {
 		oclk_dly = 0;
 		sclk_dly = 0;
@@ -73,7 +73,7 @@ int mmc_set_mod_clk(unsigned int hz)
 	       (div-1) | val;
 
 	return 0;
-}
+}*/
 int init_mmc(int num){
  mmc_num=num;
  if(num==2){
@@ -123,10 +123,10 @@ int init_mmc(int num){
  if(send_raw_cmd_value(0x80202000,mmc_offset)) return -1;
  mmc_offset->rint=0xffffffff;
  //should change clock somewhere here
- //mmc_set_mod_clk(400000);//400khz
- mmc_offset->clkcr=(tmp&=~0xff,tmp|=60);//easier to just set the clock divisor tbh
+ //mmc_set_mod_clk(400000); //this doesn't work btw
+ mmc_offset->clkcr=(tmp&=~0xff,tmp|=60);//idk i'll just do this lol, you will probably have to experiment with this if you change core pll freq
  if(send_raw_cmd_value(0x80202000,mmc_offset)) return -1;
- //mmc_set_mod_clk(400000);//400khz
+ //mmc_set_mod_clk(400000); //this doesn't work btw
  mmc_offset->clkcr=(tmp|=SUNXI_MMC_CLK_ENABLE);
  if(send_raw_cmd_value(0x80202000,mmc_offset)) return -1;
  mmc_offset->rint=0xffffffff;
@@ -216,7 +216,7 @@ int send_cmd(struct mmc_cmd *cmd){
   uint status;
   do{
    status=mmc_offset->status;
-   if(timeout--<0){error=-2;goto out;}
+   if(timeout--<=0){error=-2;goto out;}
   }while(status&SUNXI_MMC_STATUS_CARD_DATA_BUSY);
  }
  //print_hex(mmc_offset->resp3);

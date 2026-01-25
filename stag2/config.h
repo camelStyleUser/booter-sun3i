@@ -1,5 +1,5 @@
 //#define CONFIG_MEM_LOG
-#ifndef ASSEMBLY
+#ifndef __ASSEMBLER__
 typedef unsigned int uint;//i just like it this way
 #endif
 #define CONFIG_PRIO_MMC0
