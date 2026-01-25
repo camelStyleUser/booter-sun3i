@@ -17,7 +17,7 @@ struct drampara{
 char initBit;
 char smBit1;
 char smBit2;
-char dram_type;
+char dram_type;//not sure whether this is dram_type
 int bus_width;
 char cols;
 char rows;
@@ -59,19 +59,30 @@ void main(void){//this is main
 	//TODO:AAAA make it read a payload from the sd card
 	if(dram_size!=-1) stage2();
 }
-//TODO:document this stuff
-void set_dram_clock(uint freq){
+//ok so if you see anything unclear here, then dont ask me
+//it is not that i dont want to answer, it is that i simply do not know
+//asking allwinner directly would probably be a better use of time lol
+int set_dram_clock(uint freq){
+	#ifndef CONFIG_EDGE_OPTIM
+	if(freq>816){
+		puts("FREQ TOO HIGH");
+		return 1;
+	}
+	#endif
 	int rfreq;
 	rfreq=freq*1000000;//convert MHz to Hz
-	int divisor;
-	divisor=(rfreq-60000000)/(12000000);//wait is this 24MHz and /2
+	int factor;
+	factor=(rfreq-60000000)/(12000000);//AHB is 60MHz, factor is *12MHz
 	for(volatile int i=0;i<2000;i++);
-	*(volatile uint*)(CCM_BASE+CCM_O_SDRAM_PLL_R_OFF)=(divisor&0x3f)|((*(volatile uint*)(CCM_BASE+CCM_O_SDRAM_PLL_R_OFF))&0xffffcbc0)|0x8800;//TODO:understand wtf these bits are
+	*(volatile uint*)(CCM_BASE+CCM_O_SDRAM_PLL_R_OFF)=(factor&0x3f)|((*(volatile uint*)(CCM_BASE+CCM_O_SDRAM_PLL_R_OFF))&0xffffcbc0)|0x8800;//TODO:understand wtf these bits are
 	for(volatile int i=0;i<2000;i++);
+        return 0;
 }
+#define DRAMC_SDR_CTL_REG (DRAMC_BASE+0xc)
+#define DRAMC_SDR_DCR (DRAMC_BASE+0x4) //unsure
 void waitdramctrig1(void){
-	*(volatile uint*)(DRAMC_BASE+0xc)=(*(volatile uint*)(DRAMC_BASE+0xc))|(1);
-	while(((*(volatile uint*)(DRAMC_BASE+0xc))&1));
+	*(volatile uint*)(DRAMC_SDR_CTL_REG)=(*(volatile uint*)(DRAMC_SDR_CTL_REG))|(1);
+	while(((*(volatile uint*)(DRAMC_SDR_CTL_REG))&1));
 	return;
 }
 void waitdramctrig2(void){
@@ -81,34 +92,36 @@ void waitdramctrig2(void){
 }
 
 int confDRAMC(void){//uses global params
-	uint tmp=params.bus_width>>4;//because DDR
+	uint tmp=params.bus_width>>4;//check for 16-bit bus width i guess?
 	*(volatile uint*)(DRAMC_BASE+0x0)=params.smBit2|(1<<1)|(params.smBit1<<3)|\
 	(params.smBit3<<4)|(params.rows-1)<<5|(params.cols-1)<<9|\
 	(tmp<<13)|(params.initBit<<15)|(params.dram_type<<16);
-	*(volatile uint*)(DRAMC_BASE+0xc)=(*(volatile uint*)(DRAMC_BASE+0xc))|(1<<19);
+	*(volatile uint*)(DRAMC_SDR_CTL_REG)=(*(volatile uint*)(DRAMC_SDR_CTL_REG))|(1<<19);
 	waitdramctrig1();
 	return 0;
 }
+#define CCM_O_AHB_GATE_R 0xc
+#define CCM_SDRAMC_SHIFT 13
 int init_dram(void){
-	*(volatile uint*)(CCM_BASE+0xc)=(*(volatile uint*)(CCM_BASE+0xc))|(1<<13);
-	*(volatile uint*)(0x01c20a24)=(*(volatile uint*)0x01c20a24)|(1<<16);//TODO:this is DDR only, also wtf is this register?
-	set_dram_clock((DRAM_FREQ)<<1);//i just do what BOOT0 does
+	*(volatile uint*)(CCM_BASE+CCM_O_AHB_GATE_R)=(*(volatile uint*)(CCM_BASE+CCM_O_AHB_GATE_R))|(1<<CCM_SDRAMC_SHIFT);
+	*(volatile uint*)(0x01c20a24)=(*(volatile uint*)0x01c20a24)|(1<<16);//some PIO reg???,DDR only?
+	if(set_dram_clock((DRAM_FREQ)<<1)) return -1;
 	params.initBit=1;
 	params.smBit1=1;
 	params.smBit2=0;
-	params.smBit3=0;
+	params.smBit3=0;//might be double bank bit???
 	params.dram_type=1;
 	params.bus_width=16;
 	params.cols=10;
 	params.rows=13;
-	*(volatile uint*)(0x01c20a24)=(*(volatile uint*)0x01c20a24)|(1<<16);//TODO:this is DDR only, also wtf is this register?
+	*(volatile uint*)(0x01c20a24)=(*(volatile uint*)0x01c20a24)|(1<<16);//some PIO reg???,DDR only?
 	*(volatile uint*)(DRAMC_BASE+0x04)=0xa7cec93a;
 	*(volatile uint*)(DRAMC_BASE+0x08)=0x00570008;
-	*(volatile uint*)(DRAMC_BASE+0x14)=0x2000;
+	*(volatile uint*)(DRAMC_BASE+0x14)=(1<<13);//idk what this bit is but it's certainly a bit
 	confDRAMC();
 	int count=0;
 	for(int i=0;i<8;i++){
-		*(volatile uint*)(DRAMC_BASE+0xc)=(*(uint*)(DRAMC_BASE+0xc))|(i<<6);
+		*(volatile uint*)(DRAMC_SDR_CTL_REG)=(*(uint*)(DRAMC_SDR_CTL_REG))|(i<<6);
 		waitdramctrig2();
 		if ((*(volatile uint *)(DRAMC_BASE + 0x24) & 0x30) != 0) {
 			count = count + 1;
@@ -116,7 +129,7 @@ int init_dram(void){
 	}
 	if(count==8) params.dram_type=0;
 	else params.dram_type=1;
-	*(volatile uint*)(0x01c20a24)=(*(volatile uint*)0x01c20a24)|(1<<16);//TODO:this is DDR only, also wtf is this register?
+	*(volatile uint*)(0x01c20a24)=(*(volatile uint*)0x01c20a24)|(1<<16);//some PIO reg???,DDR only?
 	confDRAMC();
 	if(params.dram_type==1){
 		*(volatile uint*)(DRAMC_BASE+0)=(*(volatile uint*)(DRAMC_BASE+0))&0xfffe9fff;
@@ -125,7 +138,7 @@ int init_dram(void){
 		if(DRAM_FREQ<91) tmp1=1;
 		else if(DRAM_FREQ<151) tmp1=2;
 		else tmp1=3;
-		*(volatile uint*)(DRAMC_BASE+0x0c)=((*(volatile uint*)(DRAMC_BASE+0x0c))&0xfffffe3f)|tmp1<<6;
+		*(volatile uint*)(DRAMC_SDR_CTL_REG)=((*(volatile uint*)(DRAMC_SDR_CTL_REG))&0xfffffe3f)|tmp1<<6;
 	}
 	#ifndef CONFIG_EDGE_OPTIM
 	else{
@@ -163,7 +176,7 @@ int init_dram(void){
 	}
 	if(count==128) params.rows=12;
 	else params.rows=13;
-	*(volatile uint*)(DRAMC_BASE+0x10)=(DRAM_FREQ*499)>>6;
+	*(volatile uint*)(DRAMC_BASE+0x10)=(DRAM_FREQ*499)>>(params.rows-7);//want 13 rows to have shift of 6, 12 to have shift of 5, idk why
 	params.initBit=0;
 	confDRAMC();
 	return params.rows==13?params.cols==10?0x40:0x20:0x10 ; //return DRAM size i guess

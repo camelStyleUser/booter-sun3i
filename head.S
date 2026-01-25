@@ -5,12 +5,34 @@
 #define CCM_REG_APB_GAT	ADDR_CCM+0x10
 #define UART0_BASE	0x01c21000
 #define APB_UART0_SHIFT	5
+#define APB_PIO_SHIFT 4
+#define AHB_DMAC_SHIFT 6
 #define APB_CLOCK 30000000//from BT0
 #define BAUD 115200
 #define DIVISORVAL ((APB_CLOCK+(BAUD*8))/(BAUD*16)) //same logic as BT0
 #define BAUDLO (DIVISORVAL&0xff)
 #define BAUDHI (DIVISORVAL>>8)
 #define PIO_BASE 0x01c20800
+#define CORE_PLL_FACTOR_SHIFT 16
+#define CORE_PLL_FACTOR_MASK (((1<<7)-1)<<CORE_PLL_FACTOR_SHIFT)
+#define CORE_PLL_OUT_BYPASS (1<<26)
+#define CORE_PLL_ENABLE (1<<29)
+#define CLK_RATIO_DIV1 0
+#define CLK_RATIO_DIV2 1
+#define CLK_RATIO_DIV4 2
+#define CLK_RATIO_DIV8 3
+#define CPU_CLK_DIV1 0
+#define CPU_CLK_DIV2A 1
+#define CPU_CLK_DIV2B 2
+#define CPU_CLK_DIV4 3
+#define APB_CLK_RATIO_SHIFT 6
+#define AHB_CLK_RATIO_SHIFT 3
+#define CPU_CLK_RATIO_SHIFT 0
+#define CPU_CLK_SRC_LOSC 0
+#define CPU_CLK_SRC_HOSC 1
+#define CPU_CLK_SRC_CORE_PLL 2
+#define CPU_CLK_SRC_AUDIO_PLL_4X 3
+#define CPU_CLK_SRC_SHIFT 9
 .global _real_start
 .global uart_putc
 .global uart_isavail
@@ -30,39 +52,52 @@ _real_start://SAVE OUR CODE
 	nop
 	nop
 	nop
+/* CCM desc as i understand it:
+   we have a core PLL
+   /--------\
+   |CORE    |
+   \--------/
+   |        |
+   V        V
+   AHB      CPU
+   |
+   V
+   APB->UART
+   and some have divisors, and a smaller amount has factors
+*/
 _start://TODO:actually make the entry
 	ldr r0, =old_sp
         str sp, [r0]
         ldr sp, =(stack+1020)
 	//magic
 	ldr r0, =(ADDR_CCM)
-	ldr r1,[r0,#0x8]
-	bic r1,r1,#(0x3<<9)
-	orr r1,r1,#(0x1<<9)
-	str r1,[r0,#0x8]
-	ldr r1,[r0,#0xc]
-	orr r1,r1,#(1<<6)
-	str r1,[r0,#0xc]
-	ldr r1,[r0,#0x10]
-	orr r1,r1,#(1<<4)
-	str r1,[r0,#0x10]
-	ldr r1,[r0,#0x0]
-	ldr r2, =(0x247F0000)
+	ldr r1,[r0,#0x8] //CCM_AHB_APB_RATIO_CFG_R
+	bic r1,r1,#(3<<CPU_CLK_SRC_SHIFT)
+	orr r1,r1,#(CPU_CLK_SRC_HOSC<<CPU_CLK_SRC_SHIFT)
+	str r1,[r0,#0x8] //CCM_AHB_APB_RATIO_CFG_R
+	ldr r1,[r0,#0xc] //CCM_AHB_GATE_R //we dont use DMAC but might as well
+	orr r1,r1,#(1<<AHB_DMAC_SHIFT)
+	str r1,[r0,#0xc] //CCM_AHB_GATE_R
+	ldr r1,[r0,#0x10] //CCM_APB_GATE_R
+	orr r1,r1,#(1<<APB_PIO_SHIFT)
+	str r1,[r0,#0x10] //CCM_APB_GATE_R
+	ldr r1,[r0,#0x0] //CCM_CORE_VE_PLL_R
+	ldr r2, =(CORE_PLL_FACTOR_MASK|CORE_PLL_OUT_BYPASS|CORE_PLL_ENABLE)
 	bic r1,r1,r2
-	ldr r2, =(0x200F0000)
+	ldr r2, =((0x23<<CORE_PLL_FACTOR_SHIFT)|CORE_PLL_ENABLE)//code is modified to use 240MHz for core
 	orr r1,r1,r2
-	str r1,[r0,#0x0]
+	str r1,[r0,#0x0] //CCM_CORE_VE_PLL_R
 	mov r2,#50
         1:
         subs r2,r2,#1
-        bne 1b
-	ldr r1,[r0,#0x8]
-	bic r1,r1,#0xdb
-	orr r1,r1,#0x48
-	str r1,[r0,#0x8]
-	bic r1,r1,#0x600
-	orr r1,r1,#0x400
-	str r1,[r0,#0x8]
+        bne 1b //some delay loop
+	ldr r1,[r0,#0x8] //CCM_AHB_APB_RATIO_CFG_R
+	bic r1,r1,#((3<<APB_CLK_RATIO_SHIFT)|(3<<AHB_CLK_RATIO_SHIFT)|(3<<CPU_CLK_RATIO_SHIFT))
+	orr r1,r1,#((CLK_RATIO_DIV2<<APB_CLK_RATIO_SHIFT)|(CLK_RATIO_DIV4<<AHB_CLK_RATIO_SHIFT)|(CPU_CLK_DIV1<<CPU_CLK_RATIO_SHIFT))//APB is 30MHz,AHB is 60MHz
+	str r1,[r0,#0x8] //CCM_AHB_APB_RATIO_CFG_R
+	bic r1,r1,#(3<<CPU_CLK_SRC_SHIFT)
+	orr r1,r1,#(CPU_CLK_SRC_CORE_PLL<<CPU_CLK_SRC_SHIFT)
+	str r1,[r0,#0x8] //CCM_AHB_APB_RATIO_CFG_R
 	//end of magic
 	mrc p15,0,r0,cr1,cr0,0
 	orr r0,r0,#(1<<12)

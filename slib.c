@@ -7,7 +7,7 @@ void puts_nonl(char* string){
 }
 void puts(char* string){
 	puts_nonl(string);
-	uart_putc(0x0d);//send CR
+	uart_putc('\r');//send CR
 	uart_putc('\n');
 }
 void print_hex(unsigned int value){
@@ -47,7 +47,7 @@ void hexdump(unsigned char* data,unsigned int len){
   uart_putc(' ');
   off++;
   if(off%8==0){
-   uart_puts("");
+   puts("");
    print_hex(off);
    puts_nonl(": ");
   }
