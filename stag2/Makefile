@@ -7,10 +7,12 @@ ARM_ELF_FLAGS += -Wstrict-prototypes -Wno-format-nonliteral -Wno-format-security
 ifeq ($(BUILDTYPE),RELEASE)
 ARM_ELF_FLAGS += -Werror
 endif
+# give space for at least 8 functions of depth
+ARM_ELF_FLAGS += -Wstack-usage=256
 BOOTER_OBJECTS = enter.o limpl.o main.o slib.o mmcdrv.o mmclib.o part.o mbr.o fat32.o
 MKST2BOOT = ./mkst2boot
 PADBT2 = ./padbt2.sh
-BLKOFFSET = 48 #whatever offset you want, currently 512 sectors
+BLKOFFSET = 48 #whatever offset you want, currently 48 sectors
 all: booter2.bin booter2.desc
 	@echo "to load to sdcard do 'dd if=booter2.bin of=/dev/sdX bs=512 seek=$(BLKOFFSET)' and 'dd if=booter2.desc of=/dev/sdX bs=512 seek=15'"
 	@echo "you can change the offset(BLKOFFSET,currently $(BLKOFFSET)) used in the Makefile"

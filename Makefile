@@ -7,6 +7,8 @@ ARM_ELF_FLAGS += -Wstrict-prototypes -Wno-format-nonliteral -Wno-format-security
 ifeq ($(BUILDTYPE),RELEASE)
 ARM_ELF_FLAGS += -Werror
 endif
+# give space for at least 8 functions of depth
+ARM_ELF_FLAGS += -Wstack-usage=128
 BOOTER_OBJECTS = head.o stage2.o main.o slib.o mmclib.o mmcdrv.o
 MKSUNXIBOOT = ./mksunxiboot
 all: booter.sunxi

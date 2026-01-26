@@ -5,7 +5,7 @@
 enter:
     ldr r1, =old_sp
     str sp, [r1]
-    ldr sp, =(stack+2044)
+    ldr sp, =(stack+2048)
     mov r11,lr
     bl main
     mov lr,r11

@@ -60,11 +60,6 @@
 #define MEMLOG_END memlog+2048
 #endif
 _real_start://SAVE OUR CODE
-	b _start
-	nop
-	nop
-	nop
-	nop
 /* CCM desc as i understand it:
    we have a core PLL
    /--------\
@@ -81,7 +76,7 @@ _real_start://SAVE OUR CODE
 _start://TODO:actually make the entry
 	ldr r0, =old_sp
         str sp, [r0]
-        ldr sp, =(stack+1020)
+        ldr sp, =(stack+1024)
 	//magic
 	ldr r0, =(ADDR_CCM)
 	ldr r1,[r0,#0x8] //CCM_AHB_APB_RATIO_CFG_R
@@ -116,9 +111,6 @@ _start://TODO:actually make the entry
 	orr r0,r0,#(1<<12)
 	mcr p15,0,r0,cr1,cr0,0
 	bl uart_init
-	ldr r0,=0x00ffffff
-	ldr r1,=0x00000000
-	str r0,[r1]
 	bl main
 	ldr r0, =old_sp
 	ldr sp, [r0]

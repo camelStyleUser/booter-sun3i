@@ -24,25 +24,25 @@ int bootmmc(int num){
   #ifndef CONFIG_CONCISE_LOGS
   puts_nonl("MMC");
   print_dec(num);
-  puts(":FAIL");
+  puts("FAIL");
   #endif
   return 0;
  }
  read_block(15,(unsigned int*)(0x80000000));
  struct stage2_desc_sector* desc=(struct stage2_desc_sector*)(0x80000000);
  if(desc->magic!=DESC_MAGIC){
-  puts("NODESC");
+  puts("NODSC");
   return 0;
  }
  unsigned int expect=desc->metaadler32;
  desc->metaadler32=0;
  unsigned int actual=adler32((unsigned char*)desc,0x200);
  if(actual!=expect){
-  puts("CHKFAIL");
+  puts("BADCHK");
   #ifndef CONFIG_CONCISE_LOGS
-  puts_nonl("EXP:");
+  puts_nonl("E:");
   print_hex(expect);
-  puts_nonl(",GOT:");
+  puts_nonl(",A:");
   print_hex(actual);
   puts("");
   #endif
@@ -61,11 +61,11 @@ int bootmmc(int num){
  }                                                          // but probably not 0x80000000+ -> 0x80000000|
  actual=adler32((unsigned char*)(0x80000000),len*0x200);
  if(actual!=expect){
-  puts("BADSTAGE2");
+  puts("BADST2");
   #ifndef CONFIG_CONCISE_LOGS
-  puts_nonl("EXP:");
+  puts_nonl("E:");
   print_hex(expect);
-  puts_nonl(",GOT:");
+  puts_nonl(",A:");
   print_hex(actual);
   puts("");
   #endif
@@ -74,7 +74,7 @@ int bootmmc(int num){
  int (*entry)(int);//pass dram size in megabytes
  entry=(int (*)(int))0x80000000;
  #ifndef CONFIG_CONCISE_LOGS
- puts("RUNSTAGE2");
+ puts("RUNST2");
  #endif
  actual=entry(dram_size);
  if(actual) return 0;

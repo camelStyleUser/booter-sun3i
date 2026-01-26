@@ -16,12 +16,12 @@ int init_dram(void);
 struct drampara{
 char initBit;
 char smBit1;
-char smBit2;
+//char smBit2;
 char dram_type;//not sure whether this is dram_type
 int bus_width;
 char cols;
 char rows;
-char smBit3;
+//char smBit3;
 };
 int dram_size;
 struct drampara params;
@@ -32,7 +32,7 @@ void main(void){//this is main
 	#endif
 	#ifndef CONFIG_CONCISE_LOGS
 	puts("BOOTER UP");
-	puts_nonl("PLATFORM:SUN3I ");
+	puts_nonl("PLAT:SUN3I ");
 	if((*(uint*)(0xffff0604))==0x161900){
 	puts("F1E200");
 	}else{
@@ -53,7 +53,7 @@ void main(void){//this is main
 	}
 	#if !(defined(CONFIG_EDGE_OPTIM)&&defined(CONFIG_CONCISE_LOGS))
 	else{
-		puts("DRAM FAIL");
+		puts("DRAMFAIL");
 	}
 	#endif
 	//TODO:AAAA make it read a payload from the sd card
@@ -65,7 +65,7 @@ void main(void){//this is main
 int set_dram_clock(uint freq){
 	#ifndef CONFIG_EDGE_OPTIM
 	if(freq>816){
-		puts("FREQ TOO HIGH");
+		puts("FREQ2HIGH");
 		return 1;
 	}
 	#endif
@@ -93,8 +93,8 @@ void waitdramctrig2(void){
 
 int confDRAMC(void){//uses global params
 	uint tmp=params.bus_width>>4;//check for 16-bit bus width i guess?
-	*(volatile uint*)(DRAMC_BASE+0x0)=params.smBit2|(1<<1)|(params.smBit1<<3)|\
-	(params.smBit3<<4)|(params.rows-1)<<5|(params.cols-1)<<9|\
+	*(volatile uint*)(DRAMC_BASE+0x0)=/*params.smBit2|*/(1<<1)|(params.smBit1<<3)|\
+	/*(params.smBit3<<4)|*/(params.rows-1)<<5|(params.cols-1)<<9|\
 	(tmp<<13)|(params.initBit<<15)|(params.dram_type<<16);
 	*(volatile uint*)(DRAMC_SDR_CTL_REG)=(*(volatile uint*)(DRAMC_SDR_CTL_REG))|(1<<19);
 	waitdramctrig1();
@@ -108,8 +108,9 @@ int init_dram(void){
 	if(set_dram_clock((DRAM_FREQ)<<1)) return -1;
 	params.initBit=1;
 	params.smBit1=1;
-	params.smBit2=0;
-	params.smBit3=0;//might be double bank bit???
+	//since they are never changed might as well not use them
+	//params.smBit2=0;
+	//params.smBit3=0;//might be double bank bit???
 	params.dram_type=1;
 	params.bus_width=16;
 	params.cols=10;
@@ -142,7 +143,7 @@ int init_dram(void){
 	}
 	#ifndef CONFIG_EDGE_OPTIM
 	else{
-	puts("NOT DDR");
+	puts("NODDR");
 	return -1;
 	}
 	#endif
