@@ -121,7 +121,7 @@ int fat32_traverse(struct fat32_file* curdir,struct fat32_file* next,unsigned ch
  while((clust>=0x00000002)&&(clust<=0x0FFFFFF6)){
   for(int i=0;i<partition_data.sec_per_clust;i++){
    read_block(cur_data_sec+i,(unsigned int*)buf);
-   for(int j=0;j<32;j++){
+   for(int j=0;j<16;j++){
     if(dir_sec->entries[j].name[0]==0) goto no_results;
     if(dir_sec->entries[j].attr&FAT32_ATTR_VOLUME_ID) continue;
     good=1;

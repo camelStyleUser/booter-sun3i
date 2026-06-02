@@ -69,6 +69,7 @@ int bootmmc(int num){
   print_hex(actual);
   puts("");
   #endif
+  return 0;
  }
  shutdown_mmc(num);
  int (*entry)(int);//pass dram size in megabytes

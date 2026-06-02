@@ -12,7 +12,7 @@ ARM_ELF_FLAGS += -Wstack-usage=128
 BOOTER_OBJECTS = head.o stage2.o main.o slib.o mmclib.o mmcdrv.o
 MKSUNXIBOOT = ./mksunxiboot
 all: booter.sunxi
-	@echo "to load to sdcard do 'dd if=booter.sunxi of=/dev/sdX bs=1024 seek=8'"
+	@echo "to load to sdcard do 'dd if=booter.sunxi of=/dev/sdX bs=512 seek=16'"
 %.o: %.c
 	$(CROSS_CC) -c -march=armv5te -static-libgcc -nostdlib $(ARM_ELF_FLAGS) $< -nostdlib -o $@
 %.o: %.S

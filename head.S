@@ -60,6 +60,11 @@
 #define MEMLOG_END memlog+2048
 #endif
 _real_start://SAVE OUR CODE
+b _start
+nop
+nop
+nop
+nop
 /* CCM desc as i understand it:
    we have a core PLL
    /--------\
