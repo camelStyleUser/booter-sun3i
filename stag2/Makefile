@@ -9,7 +9,7 @@ ARM_ELF_FLAGS += -Werror
 endif
 # give space for at least 8 functions of depth
 ARM_ELF_FLAGS += -Wstack-usage=256
-BOOTER_OBJECTS = enter.o limpl.o main.o slib.o mmcdrv.o mmclib.o part.o mbr.o fat32.o
+BOOTER_OBJECTS = enter.o limpl.o main.o slib.o mmcdrv.o mmclib.o part.o mbr.o fat32.o pio.o
 MKST2BOOT = ./mkst2boot
 PADBT2 = ./padbt2.sh
 BLKOFFSET = 48 #whatever offset you want, currently 48 sectors

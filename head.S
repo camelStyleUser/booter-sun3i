@@ -12,9 +12,8 @@
 #define CLK_RATIO_DIV8 3
 #define AHB_DIV CLK_RATIO_DIV4 //derived from core pll
 #define APB_DIV CLK_RATIO_DIV2 //derived from AHB
-#define BAUD 115200
+#define BAUD 9600
 #define PIO_BASE 0x01c20800
-#define CORE_PLL_FREQ 240
 #define APB_CLOCK (CORE_PLL_FREQ/(1<<(AHB_DIV+APB_DIV)))*1000000
 #define DIVISORVAL ((APB_CLOCK+(BAUD*8))/(BAUD*16)) //same logic as BT0
 #define BAUDLO (DIVISORVAL&0xff)

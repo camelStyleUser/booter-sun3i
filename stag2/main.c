@@ -4,6 +4,7 @@
 #include "part.h"
 #include "fat32.h"
 #include "uart.h"
+#include "pio.h"
 char* old_sp;
 char stack[2048];
 #ifdef CONFIG_MEM_LOG
@@ -62,8 +63,8 @@ shutdown_mmc(0);
 #else
 shutdown_mmc(2);
 #endif
-//while(1){
-//if(uart_isavail()) uart_putc(uart_getc());
-//}
+while(1){
+if(uart_isavail()) uart_putc(uart_getc());
+}
 return 0;
 }
